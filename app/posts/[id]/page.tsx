@@ -22,7 +22,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
         const data = await res.json();
 
-        setPost(data.length > 0 ? data[0] : null);
+        console.log(data)
+
+        setPost( data || null);
       } catch (err: any) {
         setError(err.message);
       }

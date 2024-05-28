@@ -1,30 +1,26 @@
-// pages/api/posts/index.ts
 import fs from 'fs';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { cssToJson } from '@/lib/utils';
+import { v4 as uuidv4 } from 'uuid';
 
-const cssFilePath = path.join(process.cwd(), 'styles', 'posts.css');
+const cssFilePath = path.join(process.cwd(), 'public', 'styles', 'posts.css');
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
-    fs.readFile(cssFilePath, 'utf8', (err, data) => {
-      if (err) {
-        res.status(500).json({ error: 'Failed to read CSS file' });
-      } else {
-        res.status(200).json(cssToJson(data));
-      }
-    });
-  } else if (req.method === 'POST') {
-    // Handle POST request: Add a new post to the CSS file
-    const { title, author, content } = req.body;
+    try {
+      const data = fs.readFileSync(cssFilePath, 'utf8');
+      const postsJson = cssToJson(data);
+      return res.status(200).json(postsJson);
+    } catch (err) {
+      return res.status(500).json({ error: 'Failed to read CSS file' });
+    }
+  }
 
+  if (req.method === 'POST') {
+    const { title, author, content } = req.body;
     if (!title || !author || !content) {
-      res
-        .status(400)
-        .json({ error: 'Title, author, and content are required' });
-      return;
+      return res.status(400).json({ error: 'Title, author, and content are required' });
     }
 
     const postId = uuidv4();
@@ -36,16 +32,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     `;
 
-    fs.appendFile(cssFilePath, newPost, 'utf8', (err) => {
-      if (err) {
-        res.status(500).json({ error: 'Failed to write to CSS file' });
-      } else {
-        res
-          .status(200)
-          .json({ message: 'Post added successfully', id: postId });
-      }
-    });
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
+    try {
+      fs.appendFileSync(cssFilePath, newPost, 'utf8');
+      return res.status(200).json({ message: 'Post added successfully', id: postId });
+    } catch (err) {
+      return res.status(500).json({ error: 'Failed to write to CSS file' });
+    }
   }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }

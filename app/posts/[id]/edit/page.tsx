@@ -28,9 +28,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`
       );
       if (res.ok) {
-        const data = await res.json();
-
-        const post = data[0];
+        const post = await res.json();
 
         setValue('title', post.title);
         setValue('author', post.author);
