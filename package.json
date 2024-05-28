@@ -10,6 +10,7 @@
     "prettier": "prettier --write ."
   },
   "dependencies": {
+    "@types/uuid": "^9.0.8",
     "lucide-react": "^0.379.0",
     "next": "14.2.3",
     "react": "^18",
