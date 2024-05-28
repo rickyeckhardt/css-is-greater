@@ -1,9 +1,8 @@
-import fs from 'fs';
-import path from 'path';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { put, del, list } from '@vercel/blob';
 import { cssToJson } from '@/lib/utils';
 
-const cssFilePath = path.join(process.cwd(), 'public', 'styles', 'posts.css');
+const BLOB_PREFIX = 'posts-';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -14,19 +13,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      const data = fs.readFileSync(cssFilePath, 'utf8');
-      const regex = new RegExp(`\\.post-${id} \\{([^}]+)\\}`);
-      const match = data.match(regex);
-      if (match) {
-        const singlePostCss = `.post-${id} {${match[1]}}`;
-        const postJson = cssToJson(singlePostCss);
-
-        return res.status(200).json(postJson[0]);
-      } else {
+      const { blobs } = await list({ prefix: `${BLOB_PREFIX}${id}`, token: process.env.BLOB_READ_WRITE_TOKEN });
+      if (blobs.length === 0) {
         return res.status(404).json({ error: 'Post not found' });
       }
-    } catch (err) {
-      return res.status(500).json({ error: 'Failed to read CSS file' });
+      const response = await fetch(blobs[0].url);
+      const cssContent = await response.text();
+      const postJson = cssToJson(cssContent);
+
+      return res.status(200).json(postJson[0]);
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Failed to fetch post', details: err.message });
     }
   }
 
@@ -45,25 +42,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     `;
 
     try {
-      let data = fs.readFileSync(cssFilePath, 'utf8');
-      const regex = new RegExp(`\\.post-${id} \\{([^}]+)\\}`, 'g');
-      data = data.replace(regex, newPost);
-      fs.writeFileSync(cssFilePath, data, 'utf8');
-      return res.status(200).json({ message: 'Post updated successfully' });
-    } catch (err) {
-      return res.status(500).json({ error: 'Failed to update CSS file' });
+      const blob = await put(`${BLOB_PREFIX}${id}.css`, newPost, {
+        access: 'public',
+        contentType: 'text/css',
+      });
+
+      return res.status(200).json({ message: 'Post updated successfully', url: blob.url });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Failed to update post', details: err.message });
     }
   }
 
   if (req.method === 'DELETE') {
     try {
-      let data = fs.readFileSync(cssFilePath, 'utf8');
-      const regex = new RegExp(`\\.post-${id} \\{([^}]+)\\}`, 'g');
-      data = data.replace(regex, '');
-      fs.writeFileSync(cssFilePath, data, 'utf8');
+      const { blobs } = await list({ prefix: `${BLOB_PREFIX}${id}`, token: process.env.BLOB_READ_WRITE_TOKEN });
+      if (blobs.length === 0) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+      
+      const blobUrl = blobs[0].url;
+      await del(blobUrl, {
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
       return res.status(200).json({ message: 'Post deleted successfully' });
-    } catch (err) {
-      return res.status(500).json({ error: 'Failed to delete post' });
+    } catch (err: any) {
+      return res.status(500).json({ error: 'Failed to delete post', details: err.message });
     }
   }
 
