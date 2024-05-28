@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 
 async function fetchPost(id: string) {
-  const res = await fetch(`http://localhost:3000/api/posts/${id}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${id}`
+  );
 
   if (!res.ok) {
     throw new Error('Failed to fetch data');

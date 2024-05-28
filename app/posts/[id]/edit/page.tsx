@@ -24,7 +24,9 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const fetchPostData = async () => {
-      const res = await fetch(`http://localhost:3000/api/posts/${postId}`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`
+      );
       if (res.ok) {
         const data = await res.json();
 
@@ -42,11 +44,14 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
   }, [postId, setValue]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (res.ok) {
       router.push('/');
@@ -56,9 +61,12 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
   };
 
   const deletePost = async () => {
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}`, {
-      method: 'DELETE',
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`,
+      {
+        method: 'DELETE',
+      }
+    );
 
     if (res.ok) {
       router.push('/');
