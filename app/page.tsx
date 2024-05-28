@@ -11,7 +11,7 @@ export default function BlogPage() {
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`, {
+        const res = await fetch(`/api/posts`, {
           cache: 'no-cache',
         });
 

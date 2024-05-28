@@ -14,7 +14,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchPost = async (id: string) => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${id}`);
+        const res = await fetch(`/api/posts/${id}`);
 
         if (!res.ok) {
           throw new Error('Failed to fetch data');

@@ -24,9 +24,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const fetchPostData = async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`
-      );
+      const res = await fetch(`/api/posts/${postId}`);
       if (res.ok) {
         const post = await res.json();
 
@@ -43,7 +41,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`,
+      `/api/posts/${postId}`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -60,7 +58,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
 
   const deletePost = async () => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`,
+      `/api/posts/${postId}`,
       {
         method: 'DELETE',
       }
