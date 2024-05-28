@@ -21,7 +21,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const regex = new RegExp(`\\.post-${id} \\{([^}]+)\\}`);
         const match = data.match(regex);
         if (match) {
-          console.log('MATCH: ', match);
           res.status(200).json(cssToJson(match[0]));
         } else {
           res.status(404).json({ error: 'Post not found' });

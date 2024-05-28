@@ -13,7 +13,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       if (err) {
         res.status(500).json({ error: 'Failed to read CSS file' });
       } else {
-        console.log(data);
         res.status(200).json(cssToJson(data));
       }
     });

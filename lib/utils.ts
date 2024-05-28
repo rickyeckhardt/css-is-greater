@@ -16,7 +16,8 @@ export const cssToJson = (cssString: string): Post[] => {
         const [key, value] = prop.split(':').map((s) => s.trim());
         if (key && value) {
           const cleanedKey = key.replace(/^--/, '');
-          props[cleanedKey] = value.replace(/^"|"$/g, '');
+          // Remove both double and single quotes from the value
+          props[cleanedKey] = value.replace(/^["']|["']$/g, '');
         }
       });
 

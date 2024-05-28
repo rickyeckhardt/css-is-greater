@@ -1,26 +1,38 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 
-async function fetchPost(id: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${id}`
-  );
+export default function PostPage({ params }: { params: { id: string } }) {
+  const [post, setPost] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const postId = params.id;
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch data');
-  }
+  useEffect(() => {
+    const fetchPost = async (id: string) => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${id}`);
 
-  return res.json();
-}
+        if (!res.ok) {
+          throw new Error('Failed to fetch data');
+        }
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-  const posts = await fetchPost(params.id);
+        const data = await res.json();
 
-  const post = posts.length > 0 ? posts[0] : undefined;
+        setPost(data.length > 0 ? data[0] : null);
+      } catch (err: any) {
+        setError(err.message);
+      }
+    };
 
-  if (!post) {
-    redirect('/');
+    fetchPost(postId);
+  }, [postId]);
+
+  if (error) {
+    return <p className="text-red-500">Error: {error}</p>;
   }
 
   return (
@@ -29,18 +41,24 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         <Link href="/" className="border rounded-sm">
           <ChevronLeft />
         </Link>
-        <Link
-          href={`/posts/${post?.id}/edit`}
-          className="border rounded-md px-4 py-1 bg-black text-white"
-        >
-          Edit Post
-        </Link>
+        {post && (
+          <Link
+            href={`/posts/${post.id}/edit`}
+            className="border rounded-md px-4 py-1 bg-black text-white"
+          >
+            Edit Post
+          </Link>
+        )}
       </div>
-      <header>
-        <h1 className="text-3xl font-bold">{post?.title}</h1>
-        <h2 className="text-md">Author: {post?.author}</h2>
-      </header>
-      <p className="max-w-prose text-lg">{post?.content}</p>
+      {post && (
+        <>
+          <header>
+            <h1 className="text-3xl font-bold">{post.title}</h1>
+            <h2 className="text-md">Author: {post.author}</h2>
+          </header>
+          <p className="max-w-prose text-lg">{post.content}</p>
+        </>
+      )}
     </main>
   );
 }
